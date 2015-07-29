@@ -39,7 +39,11 @@ class Vecparser:
             else:
                 self.stack.append(item)
 
-        return self.stack[0]
+        tmp = float(self.stack[0])
+        if tmp == int(tmp):
+            return int(tmp)
+        else:
+            return tmp
 
 if __name__ == '__main__':
     while True:
