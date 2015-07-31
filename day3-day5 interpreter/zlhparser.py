@@ -1,4 +1,4 @@
-#-*utf-8*-
+#-*coding:utf-8*-
 import zlhlexer
 
 
@@ -66,10 +66,11 @@ class zlhparser:
 
                 if self.match(zlhlexer.AS):
                     self.advance()
-        
-                    self.symtab[t].append(self.cur_token[1])
+                    if len(self.symtab[t]) == 1:
+                        self.symtab[t].append(self.expr())
+                    elif len(self.symtab[t]) == 2:
+                        self.symtab[t][1] = self.expr()
                     #print self.symtab
-                    self.advance()
 
                 if not self.match(zlhlexer.SEM):
                     raise Exception(';?')
@@ -100,20 +101,50 @@ class zlhparser:
 
 
     def expr(self):
-        token_type, token_val = self.cur_token
-        if token_type == zlhlexer.CHAR:
+        tmp = []
+        while self.cur_token and self.cur_token[1] != ';':
+            tmp.append(self.cur_token)
             self.advance()
-            return token_val
-        if token_type == zlhlexer.INT:
-            tmp = ''
-            while cur_token[1] != ';':
-                tmp += self.cur_token[1]
-                self.advance()
-            val = eval(tmp)
-            return val
-        if token_type == zlhlexer.FLOAT:
-            self.advance()
-            return token_val
+
+        sets = set()
+        for item in tmp:
+            sets.add(item[0])
+
+        if len(tmp) == 1:
+            if tmp[0][0] == zlhlexer.ID:
+                return self.symtab[tmp[0][1]][1]
+            if tmp[0][0] != zlhlexer.ID:
+                return tmp[0][1]
+
+        elif zlhlexer.ID not in sets:
+            tmp2 = ''
+            for item in tmp:
+                tmp2 += str(item[1])
+
+            try:
+                print tmp2
+                result = eval(tmp2)
+                return result
+            except:
+                raise Exception('Asignment worng')
+
+        elif zlhlexer.ID in sets:
+            tmp3 = ''
+            for item in tmp:
+                if item[0] != zlhlexer.ID:
+                    tmp3 += str(item[1])
+                else:
+                    tmp3 += str(self.symtab[item[1]][1])
+
+            try:
+                print tmp3
+                result = eval(tmp3)
+                return result
+            except:
+                return tmp3.replace('+','')
+
+
+        
 
 
     def match(self, token_type):
@@ -126,8 +157,13 @@ if __name__ == '__main__':
     main{
         int a;
         float b;
-        a = 1;
+        chars c;
+        c = 's';
         b = 1.1;
+        a = 1+1+c;
+        b = 1.5;
+        print c;
+        print a;
         print b;
     }
     '''
@@ -138,6 +174,7 @@ if __name__ == '__main__':
     while t[0] != zlhlexer.EOF:
         undefine.append(t)
         t = lex.get_next_token()
-    print undefine
+    #print undefine
     parser = zlhparser(undefine)
     parser.parser()
+    #print parser.symtab
