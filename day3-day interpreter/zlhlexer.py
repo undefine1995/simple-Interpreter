@@ -79,10 +79,10 @@ class Veclexer:
             self.pos += 3
             self.current_char = self.text[self.pos]
 
-            return (INT, 'int')
+            return (VAR, 'int')
 
         if n[0:5] == 'chars':
-            self.pos += 4
+            self.pos += 5
             self.current_char = self.text[self.pos]
 
             return (VAR, 'chars')
@@ -175,12 +175,15 @@ class Veclexer:
         return (EOF, 'EOF')
 
 
+    def has_next(self):
+        return self.current_char != EOF
+
 
 if __name__ == '__main__':
     exp = '''
         main{
         int i;
-        chars a;
+        chars aa;
         i=5;
         a='b';
         a=a+5;
@@ -193,4 +196,5 @@ if __name__ == '__main__':
 
     while t[0] != EOF:
         print(t)
+        print(lex.has_next())
         t = lex.get_next_token()
